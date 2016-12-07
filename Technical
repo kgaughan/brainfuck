@@ -1,0 +1,63 @@
+Technical details
+~~~~~~~~~~~~~~~~~
+
+This interpreter is only 328 bytes long which makes it the smallest
+interpreter for RiscOS, I think. It is possible to bring it down to 320
+bytes, but it entails doing something I am unwilling to do - sacrificing the
+only bit of code written for speed.
+
+Memory map:
+
++----------------+ = 0x8000
+|   Interpreter  |
++----------------+ = 0x8148
+|   Data Array   |
++----------------+ = 0xF678
+|     Program    |
++----------------+ = +?
+| Interp's Stack |
++----------------+ = R13
+
+The program uses a Empty, Ascending stack which can grow after your program
+until it hits the top of its wimpslot. If this happens, you will get an
+'Abort on Data Transfer' error. To solve this, try increasing the amount of
+memory the program has.
+
+There is no bounds checking on the data array so if you move the data pointer
+outside the bounds of the array and write to the memory at that location, you
+will corrupt either the interpreter, which would be fatal, or your program,
+which would be annoying. This can, however, allow self-modifying code dispite
+the fact that strictly speaking non-von Neumann machines like this should not
+allow for it, though you shouldn't try it!
+
+Because of the way the interpreter is constructed, a ] instruction without a
+matching [ preceeding it in the program will cause the program to end. I
+wouldn't rely on this feature though.
+
+When entering data, any control codes are converted to linefeeds and
+linefeeds are treated as newlines. On output, any control characters are
+treated as newlines. This may change so the only values safe to use as
+newlines are LF (11) and CR (13).
+
+The actual results of operations on the data array are only stored in it when
+the data array pointer is changed, for speed. This is the bit I'm unwilling to
+sacrifice.
+
+My interpreter's code for implementing the [ and ] commands is actually a
+cleaner program than Urban Mueller's. I didn't look at his C source until I
+finished the first BASIC port and then it was only to see how different they
+were. The assembler version is an almost straight conversion of my BASIC
+version.
+
+All characters which are not commands are treated as NoOps and can be used as
+comments.
+
+There is a command # in Urban's interpreter which dumps the numerical value
+of the first 10 elements of the data array to the screen. This is not
+actually part of the language and is not included in this port.
+
+According to one source, a *Compiler* was written for the language which was
+less than or equal to 256 bytes in size! This sounds just a bit daft to me.
+
+It has been proven that the language is Turing-complete, though I don't have
+a copy of the proof.

@@ -1,0 +1,13 @@
+=====VARIA=======
+[
+most of these require the numbers to the right of the
+pointer to be 0
+
+CLR  =	[-]
+ADD  =	[<+>-]<
+DUP  =	[>+>+<<-]>>[<<+>>-]
+SWAP =	[>+<-]<[>+<-]>>[<<+>>-]<
+MUL  =	>[-]>[-]<< <[>[>+>+<<-] >[<+>-] <-] >>>[<<<+>>>-]<<<
+IF   =	>[-]<[>[-]+<-]> (your program here) <
+
+]
