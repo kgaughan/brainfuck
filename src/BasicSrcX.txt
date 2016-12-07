@@ -1,0 +1,69 @@
+REM>Brainfuck
+REM by Urban Mueller
+REM RiscOS version by Keith Gaughan
+REM v1.0 (Thu 12th August 1999)
+
+ON ERROR PRINT REPORT$;" at ";ERL:END
+PROCinitstack(64)
+
+SYS "OS_GetEnv" TO p$
+p$=MID$(p$,INSTR(p$," -quit ")+7)
+IF LEFT$(p$,1)=" " THEN p$=MID$(p$,1):GOTO 110
+p$=MID$(p$,INSTR(p$," ")+1)
+
+h%=OPENINp$
+IF h%=0 THEN END
+size%=EXT#h%
+CLOSE#h%
+DIM program% size%
+OSCLI"Load "+p$+" "+STR$~program%
+
+DIM a% 30000
+FOR b%=0 TO 30000 STEP 4
+a%!b%=0
+NEXT
+
+REM From here down is the interpreter code...
+
+b%=program%:e%=program%+size%:d%=0
+GOSUB 330
+END
+
+REM Push link reg onto stack.
+f%=?b%
+IF f%=ASC"<" THEN ?a%=d%:a%-=1:d%=?a%
+IF f%=ASC">" THEN ?a%=d%:a%+=1:d%=?a%
+IF f%=ASC"+" THEN d%+=1
+IF f%=ASC"-" THEN d%-=1
+IF f%=ASC"," THEN 590
+IF f%=ASC"." THEN 610
+IF f%=ASC"]" THEN RETURN
+IF f%<>ASC"[" THEN 560:REM Pull last link reg.
+IF d%>0 THEN 490
+c%=1
+b%+=1
+f%=?b%
+IF f%=91 THEN c%+=1:REM [
+IF f%=93 THEN c%-=1:REM ]
+IF c%>0 THEN 440
+GOTO 560
+PROCpush(b%)
+b%+=1
+GOSUB 330
+c%=b%
+b%=FNpull
+IF d%>0 THEN 490
+b%=c%
+b%+=1
+IF b%<e% THEN 330
+END
+d%=ASCGET$
+IF d%=13 THEN d%=10
+IF d%=10 THEN PRINT ELSE PRINT CHR$d%;
+GOTO 560
+
+REM These routines partially implement what would be done by
+REM the LDMEA and STMEA instructions in assembler.
+DEF PROCinitstack(size%):DIM stack%(size%):stackp%=0:ENDPROC
+DEF PROCpush(n%):stack%(stackp%)=n%:stackp%+=1:ENDPROC
+DEF FNpull:IF stackp%=0 THEN =0 ELSE stackp%-=1:=stack%(stackp%)

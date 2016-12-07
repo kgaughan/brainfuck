@@ -1,0 +1,54 @@
+REM>Brainfuck
+REM by Urban Mueller
+REM RiscOS version by Keith Gaughan
+REM v1.0 (Thu 12th August 1999)
+
+SYS "Hourglass_Start",1
+SYS "OS_GetEnv" TO p$
+p$=MID$(p$,INSTR(p$," -quit ")+7)
+WHILE LEFT$(p$,1)=" ":p$=MID$(p$,1):ENDWHILE
+p$=MID$(p$,INSTR(p$," ")+1)
+
+h%=OPENINp$:IF h%=0 THEN END
+size%=EXT#h%:CLOSE#h%
+DIM program% size%
+OSCLI"Load "+p$+" "+STR$~program%
+
+DIM array% 30000
+FOR c%=0 TO 30000 STEP 4:array%!c%=0:NEXT
+SYS "Hourglass_Off"
+
+OFF
+p%=array%
+temp%=FNinterp(program%)
+ON
+END
+
+DEF FNinterp(c%)
+ LOCAL d%
+ REPEAT
+  CASE CHR$?c% OF
+   WHEN "<":p%-=1
+   WHEN ">":p%+=1
+   WHEN "+":?p%+=1
+   WHEN "-":?p%-=1
+   WHEN ".":IF ?p%=10 THEN PRINT ELSE PRINT CHR$?p%;
+   WHEN ","
+    ON:?p%=ASCGET$:OFF
+    IF ?p%=10 THEN PRINT ELSE PRINT CHR$?p%;
+   WHEN "["
+    IF ?p%=0 THEN
+     d%=0
+     REPEAT
+      c%+=1
+      IF ?c%=91 THEN d%+=1:REM [
+      IF ?c%=93 THEN d%-=1:REM ]
+     UNTIL d%=-1
+    ELSE
+     WHILE ?p%:d%=FNinterp(c%+1):ENDWHILE:c%=d%
+    ENDIF
+   WHEN "]":=c%
+  ENDCASE
+  c%+=1
+ UNTIL c%=program%+size%
+=0

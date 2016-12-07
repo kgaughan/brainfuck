@@ -1,0 +1,124 @@
+REM>Brainfuck
+REM by Urban Mueller
+REM RiscOS Assembler version by Keith Gaughan
+REM v2.01  28-Aug-1999, 03:19am
+
+ON ERROR PRINT REPORT$;" at ";ERL:END
+DIM code% 2048
+sp=13:link=14:pc=15
+file$="<Obey$Dir>.Brainfuck"
+:
+FOR pass%=0 TO 2 STEP 2:PROCass:NEXT
+OSCLI "Save "+file$+" "+STR$~code%+" "+STR$~array%
+OSCLI "SetType "+file$+" Absolute"
+END
+:
+DEF PROCass
+P%=code%
+[OPT pass%
+     ; Register usage -
+     ; R12 - array pointer (p%)
+     ; R11 - VM ProgCounter (c%)
+     ; R10 - data pointed to by R12
+     ; R9  - end of program
+     ; <R8 - temporary registers
+
+; Initialisation...
+            ADR     R12,array%
+
+            ADD     R11,R12,#29952
+            ADD     R11,R11,#48
+
+            MOV     R8,R12
+            MOV     R10,#0
+.zeroarray% STR     R10,[R8],#4
+            CMP     R8,R11
+            BLT     zeroarray%
+            ; R10 is zero after this point, thankfully.
+
+            SWI     "OS_GetEnv"
+.getfname%  LDRB    R1,[R0],#1
+            CMP     R1,#32
+            BGT     getfname%
+            ; Leaving the next line in will prevent an error if
+            ; no filename is given. If you want an error, leave
+            ; it in.
+            ; SWILT   "OS_Exit"
+
+            MOV     R1,R0
+            MOV     R0,#23
+            SWI     "OS_File"
+            CMP     R0,#1
+            SWINE   "OS_Exit"
+            ADD     sp,R11,R4
+            MOV     R9,sp
+            ADD     sp,sp,#3  ; I'm aligning the bottom of the
+            BIC     sp,sp,#3  ; stack here, doncha know...
+            MOV     R0,#255
+            MOV     R2,R11
+            MOV     R3,#0
+            SWI     "OS_File"
+
+; Interpreter...
+            BL      interp%
+            SWI     "OS_Exit"
+.interp%    STMEA   (sp)!,{link}
+.intloop%   LDRB    R8,[R11]
+            AND     R10,R10,#255
+            CMP     R8,#ASC">"
+            STREQB  R10,[R12]
+            ADDEQ   R12,R12,#1
+            LDREQB  R10,[R12]
+            CMP     R8,#ASC"<"
+            STREQB  R10,[R12]
+            SUBEQ   R12,R12,#1
+            LDREQB  R10,[R12]
+            CMP     R8,#ASC"+"
+            ADDEQ   R10,R10,#1
+            CMP     R8,#ASC"-"
+            SUBEQ   R10,R10,#1
+            CMP     R8,#ASC"."
+            BEQ     printchar%
+            CMP     R8,#ASC","
+            BEQ     readchar%
+            CMP     R8,#ASC"]"
+            LDMEQEA (sp)!,{pc}
+            CMP     R8,#ASC"["
+            BNE     intlend%
+            CMP     R10,#0
+            BNE     whilesub%
+            MOV     R7,#1
+.findend%   LDRB    R8,[R11,#1]!
+            CMP     R8,#ASC"["
+            ADDEQ   R7,R7,#1
+            CMP     R8,#ASC"]"
+            SUBEQ   R7,R7,#1
+            CMP     R7,#0
+            BGT     findend%
+            B       intlend%
+.whilesub%  STMEA   (sp)!,{R11}
+            ADD     R11,R11,#1
+            BL      interp%
+            LDMEA   (sp)!,{R8}
+            CMP     R10,#0
+            MOVNE   R11,R8
+            BNE     whilesub%
+.intlend%   ADD     R11,R11,#1
+            CMP     R11,R9
+            BLT     intloop%
+            SWI     "OS_Exit"
+
+.readchar%  SWI     "OS_ReadC"
+            CMP     R0,#32
+            MOVLT   R0,#10
+            MOV     R10,R0
+            B       output%
+.printchar% MOV     R0,R10
+            CMP     R0,#32
+.output%    SWILT   "OS_NewLine"
+            SWIGE   "OS_WriteC"
+            B       intlend%
+
+.array%
+]
+ENDPROC

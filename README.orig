@@ -1,0 +1,94 @@
+Beware all those who enter for you are doomed to encounter...
+
+        BRAINFUCK v2.02 (30-Sep-1999, 11:51pm)
+        Original version by Urban Mueller
+        RiscOS version by Keith Gaughan
+
+So you've been brave enough to look at the help file - congratulations! You
+are about to stare into the eyes of hell.
+
+Brainfuck is an experiment to implement a language machine with as few
+instructions as possible and yet be completely Turing-complete without using
+self-modifying code. It is, to say the least, a fairly evil language, but not
+intentionally so (though another language, Malbolge, is pure evil but we'll
+come back to that some other time). Anyway, on with the show...
+
+There are 8 instructions:
+
+Cmd     C Equivalent            Effect
+~~~     ~~~~~~~~~~~~            ~~~~~~
++       array[p]++;             Increase element under pointer
+-       array[p]--;             Decrease element under pointer
+>       p++;                    Increase pointer
+<       p--;                    Decrease pointer
+[       while (array[p]) {      Start loop, counter under pointer
+]       }                       Indicate end of loop
+.       putchar(array[p]);      Output ASCII code under pointer
+,       array[p]=getchar();     Read char and stores ASCII under pointer
+
+All other characters are ignored. The 30000 array elements and p are
+initialised as zero at the beginning. While this seems pretty useless as far
+as languages go, it can be proven that it can compute every solvable
+mathematical problem if you ignore the size of the array.
+
+You've probably already noticed that this is a not a von Neumann machine -
+the data and the code are kept seperate, so you don't have to worry about
+overwriting your program.
+
+If you want examples of the program, open up the application and look inside
+the 'Programs' directory. If you write any programs in Brainfuck, pass them
+on to me if you can.
+
+Sorry about the cheesy frontend - I wrote it just to test the program though
+it's sufficient for anybody insane enough to use it.
+
+This interpreter is (c) Keith Gaughan, 1999. The program is Freeware (for what
+it's worth) and you can feel free to look at the source or alter it, but if
+you do alter it, please don't distribute the altered version without my
+permission. Send me a copy of the altered program and if I think the
+improvement it worth it, you can distribute it. I cannot be held liable for
+anything that happens as a result of the use of this software.
+
+
+Other esoteric enterprises
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+INTERCAL        The original devil-language, created as a joke, but somehow
+                obtained cult status. If I get a C compiler, I'll port the
+                superb (as far as INTERCAL goes) C-INTERCAL INTERCAL-to-C
+                translator.
+FALSE           A Forth-esque language with lambda expressions and lots of
+                other cool stuff. I really like this one, and I'll probably
+                write a compiler in assembler for this to see if I can get it
+                under 1k, like the original Amiga version. Really groovy.
+BEFUNGE         A 2D fungoid engine. This one's completely unlike any
+                language you're ever going to see. More like some sort of
+                wierd spreadsheet than a programming langage (though that's a
+                bad description).
+DIS             Unlike Brainfuck, which was primarily meant to prove a
+                principle, Dis is the spawn of Beelzebub himself. It is
+                designed to be truly evil - to get it to work like a proper
+                Turing Machine you must use self-modifying code! Aaarrgh.
+                This, by the way is a more 'humane' version of the language
+                Malbolge. Dis translates as 'Satan'.
+
+And if that's not enough to make me a pariah amongst RiscOS coders, there is
+more of the same out there...
+
+History
+~~~~~~~
+1.00            The original RiscOS port. Written in BASIC.
+(12-Aug-1999)
+
+2.00            Converted to Assembler.
+(27-Aug-1999)
+
+2.01            Fixed some stuff to bring the code size down a bit. Shifted
+(27-Aug-1999)   the code for the [ command into the main body of the
+                interpreter to save on a branch instruction. Made all control
+                codes turn into newlines. It's possible to shave off 8 more
+                bytes but I am unwilling to.
+
+2.02            Not a major bug, just one which was slowing it down slightly.
+(30-Sep-1999)   I had forgotten to include EQ condition codes for the LDR
+                and STR instructions for the code to execute the '<' and '>'
+                instructions.
